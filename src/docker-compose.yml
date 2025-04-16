@@ -1,0 +1,37 @@
+﻿
+services:
+  catalogdb:
+    container_name: catalogdb
+    image: mongo
+    restart: always
+    ports: 
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval 'db.runCommand(\\\"ping\\\")' || exit 1"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+
+
+  catalog.api:
+    container_name: catalog.api
+    build:
+      context: .
+      dockerfile: Services/Catalog/Catalog.API/Dockerfile
+    restart: always
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DatabaseSettings__ConnectionString: "mongodb://catalogdb:27017"
+      ASPNETCORE_URLS: "http://+:80"
+    depends_on:
+      catalogdb:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+
+
+volumes:
+  mongo_data:
+

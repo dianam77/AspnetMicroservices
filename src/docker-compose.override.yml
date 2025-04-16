@@ -1,0 +1,133 @@
+
+services:
+  catalog.api:
+    container_name: catalog.api
+    build:
+      context: .
+      dockerfile: Services/Catalog/Catalog.API/Dockerfile
+    restart: always
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DatabaseSettings__ConnectionString: "mongodb://catalogdb:27017"
+      ASPNETCORE_URLS: "http://+:80"
+      DEBUG: "true"
+    depends_on:
+      catalogdb:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    healthcheck:
+      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:80/health"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+
+  basket.api:
+    container_name: basket.api
+    build:
+      context: .
+      dockerfile: Services/Basket/Basket.API/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - CacheSettings__ConnectionString=basketdb:6379
+      - GrpcSettings__DiscountUrl=http://discount.grpc:80
+    depends_on:
+      - basketdb
+      - discount.grpc
+    ports:
+      - "8084:80"
+
+  discount.api:
+    container_name: discount.api
+    build:
+      context: .
+      dockerfile: Services/Discount/Discount.API/Dockerfile
+    restart: always
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DatabaseSettings__ConnectionString: "Server=discountdb;Port=5432;Database=DiscountDb;Username=admin;Password=admin1234"
+      ASPNETCORE_URLS: "http://+:80"
+      DEBUG: "true"
+    depends_on:
+      discountdb:
+        condition: service_healthy
+    ports:
+      - "8082:80"
+    healthcheck:
+      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:80/health"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+
+  discount.grpc:
+    container_name: discount.grpc
+    build:
+      context: .
+      dockerfile: Services/Discount/Discount.GRPC/Dockerfile
+    restart: always
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DatabaseSettings__ConnectionString: "Server=discountdb;Port=5432;Database=DiscountDb;Username=admin;Password=admin1234"
+      ASPNETCORE_URLS: "http://+:80"
+      DEBUG: "true"
+    depends_on:
+      discountdb:
+        condition: service_healthy
+    ports:
+      - "8083:80"
+    healthcheck:
+      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:80/health"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+
+  basketdb:
+    container_name: basketdb
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+
+ 
+  catalogdb:
+    image: mongo
+    container_name: catalogdb
+    restart: always
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand({ connectionStatus: 1 })"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+
+  discountdb:
+    container_name: discountdb
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin1234
+      POSTGRES_DB: DiscountDb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "admin", "-d", "DiscountDb"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  mongo_data:
+  postgres_data:
+  pgadmin_data:
+  portainer_data:
