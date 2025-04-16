@@ -14,6 +14,58 @@ services:
       retries: 5
       start_period: 10s
 
+  basketdb:
+    container_name: basketdb
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping || exit 1"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+
+  discountdb:
+    container_name: discountdb
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin1234
+      POSTGRES_DB: DiscountDb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d DiscountDb || exit 1"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@aspnetrun.com
+      PGADMIN_DEFAULT_PASSWORD: admin1234
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/root/.pgadmin
+
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce
+    restart: always
+    ports:
+      - "8000:8000"
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
 
   catalog.api:
     container_name: catalog.api
@@ -31,7 +83,59 @@ services:
     ports:
       - "8080:80"
 
+  basket.api:
+    container_name: basket.api
+    build:
+      context: .
+      dockerfile: Services/Basket/Basket.API/Dockerfile
+    restart: always
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development  
+      CacheSettings__ConnectionString: "basketdb:6379"
+      ASPNETCORE_URLS: http://+:80
+      DEBUG: "true"  # Adding a DEBUG variable for development
+      GrpcSettings__DiscountUrl: "http://localhost:5004"  # Adding DiscountUrl for gRPC settings
+    depends_on:
+      basketdb:
+        condition: service_healthy
+    ports:
+      - "8084:80"  # Ensure port 8081 is correctly mapped to container port 80 for Basket API
+
+
+  discount.api:
+    container_name: discount.api
+    build:
+      context: .
+      dockerfile: Services/Discount/Discount.API/Dockerfile
+    restart: always
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DatabaseSettings__ConnectionString: "Server=discountdb;Port=5432;Database=DiscountDb;Username=admin;Password=admin1234"
+      ASPNETCORE_URLS: "http://+:80"
+    depends_on:
+      discountdb:
+        condition: service_healthy
+    ports:
+      - "8082:80"
+
+  discount.grpc:
+    container_name: discount.grpc
+    build:
+      context: .
+      dockerfile: Services/Discount/Discount.GRPC/Dockerfile
+    restart: always
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DatabaseSettings__ConnectionString: "Server=discountdb;Port=5432;Database=DiscountDb;Username=admin;Password=admin1234"
+      ASPNETCORE_URLS: "http://+:80"
+    depends_on:
+      discountdb:
+        condition: service_healthy
+    ports:
+      - "8083:80"
 
 volumes:
   mongo_data:
-
+  postgres_data:
+  pgadmin_data:
+  portainer_data:
