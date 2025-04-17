@@ -6,15 +6,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
-// Configure Kestrel to use HTTP/2 for gRPC
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ListenAnyIP(5004, listenOptions =>
-    {
-        listenOptions.Protocols = HttpProtocols.Http2; // gRPC uses HTTP/2
-    });
-    options.ListenAnyIP(5001); // HTTP port for REST/Swagger
-});
+
 
 // Add services to the container
 builder.Services.AddControllers();
@@ -29,15 +21,24 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = redisConnectionString;
 });
 
-builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(o =>
-{
-    o.Address = new Uri(configuration["GrpcSettings:DiscountUrl"]);
-});
 
 
 // Register custom services
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
+builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(o =>
+{
+    o.Address = new Uri(configuration["GrpcSettings:DiscountUrl"]);
+});
 builder.Services.AddScoped<DiscountGrpcService>();
+
+
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddJsonFile("appsettings.Docker.json", optional: true) 
+    .AddEnvironmentVariables();
+
 
 var app = builder.Build();
 
@@ -52,6 +53,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// ❌ Removed: app.MapGrpcService<DiscountGrpcService>(); – not a gRPC service
 
 app.Run();

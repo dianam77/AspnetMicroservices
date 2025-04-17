@@ -12,10 +12,11 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(80, listenOptions =>
+    options.ListenAnyIP(5004, listenOptions =>
     {
         listenOptions.Protocols = HttpProtocols.Http2;
     });
+
 });
 
 var app = builder.Build();
