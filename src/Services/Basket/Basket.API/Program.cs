@@ -29,24 +29,15 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = redisConnectionString;
 });
 
-
-
-// Register custom services
-builder.Services.AddScoped<IBasketRepository, BasketRepository>();
 builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(o =>
 {
     o.Address = new Uri(configuration["GrpcSettings:DiscountUrl"]);
 });
+
+
+// Register custom services
+builder.Services.AddScoped<IBasketRepository, BasketRepository>();
 builder.Services.AddScoped<DiscountGrpcService>();
-
-
-builder.Configuration
-    .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json", optional: false)
-    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
-    .AddJsonFile("appsettings.Docker.json", optional: true) 
-    .AddEnvironmentVariables();
-
 
 var app = builder.Build();
 
@@ -61,5 +52,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// ❌ Removed: app.MapGrpcService<DiscountGrpcService>(); – not a gRPC service
 
 app.Run();

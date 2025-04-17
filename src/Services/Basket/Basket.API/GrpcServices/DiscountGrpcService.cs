@@ -1,5 +1,4 @@
 ﻿using Discount.GRPC;
-using Grpc.Core;
 
 namespace Basket.API.GrpcServices
 {
@@ -14,9 +13,9 @@ namespace Basket.API.GrpcServices
 
         public async Task<CouponModel> GetDiscount(string productName)
         {
-            var discountrequest = new GetDiscountRequest { ProductName = productName };
-
-            return await _discountProtoService.GetDiscountAsync(discountrequest);
+            var discountRequest = new GetDiscountRequest { ProductName = productName };
+            return await _discountProtoService.GetDiscountAsync(discountRequest);
         }
     }
+
 }

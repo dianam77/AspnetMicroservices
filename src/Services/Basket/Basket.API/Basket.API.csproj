@@ -21,9 +21,7 @@
 		<!-- ✅ Ensure the correct reference to Discount.GRPC project -->
 
 		<!-- ✅ Link to the Protobuf file for gRPC -->
-		<Protobuf Include="..\..\Discount\Discount.GRPC\Protos\Discount.proto" GrpcServices="Client">
-			<link>Protos\discount.proto</link>
-		</Protobuf>
+		<Protobuf Include="..\..\Discount\Discount.GRPC\Protos\Discount.proto" GrpcServices="Client" />
 
 		<!-- ✅ Ensure appsettings.json and appsettings.Development.json are copied to output -->
 		<None Update="appsettings.json">
