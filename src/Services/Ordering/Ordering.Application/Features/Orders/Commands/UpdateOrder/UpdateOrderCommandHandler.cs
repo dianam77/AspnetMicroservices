@@ -32,11 +32,16 @@ namespace Ordering.Application.Features.Orders.Commands.UpdateOrder
             {
                 throw new NotFoundEXception(nameof(Order), request.Id);
             }
+
+            _mapper.Map(request, orderToUpdate);
+
             await _orderRepository.UpdateAsync(orderToUpdate);
 
-            _logger.LogInformation($"Order {orderToUpdate.Id} is successfully updat");
+            _logger.LogInformation($"Order {orderToUpdate.Id} is successfully updated.");
+
             return Unit.Value;
         }
+
 
     }
 }

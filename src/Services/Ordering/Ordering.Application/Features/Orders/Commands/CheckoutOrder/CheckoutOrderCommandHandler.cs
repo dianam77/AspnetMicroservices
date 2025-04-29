@@ -13,14 +13,14 @@ using System.Threading.Tasks;
 
 namespace Ordering.Application.Features.Orders.Commands.CheckoutOrder
 {
-    class CheckoutOrderCommandHandler : IRequestHandler<CheckoutOrderCommand, int>
+    public class CheckoutOrderCommandHandler : IRequestHandler<CheckoutOrderCommand, int>
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IMapper _mapper;
-        private readonly IEmailServices _emailServices;
+        private readonly IEmailService _emailServices;
         private readonly ILogger<CheckoutOrderCommandHandler> _logger;
 
-        public CheckoutOrderCommandHandler(IOrderRepository orderRepository, IMapper mapper, IEmailServices emailServices, ILogger<CheckoutOrderCommandHandler> logger)
+        public CheckoutOrderCommandHandler(IOrderRepository orderRepository, IMapper mapper, IEmailService emailServices, ILogger<CheckoutOrderCommandHandler> logger)
         {
             _orderRepository = orderRepository ?? throw new ArgumentException(nameof(orderRepository));
             _mapper = mapper ?? throw new ArgumentException(nameof(mapper));

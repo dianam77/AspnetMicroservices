@@ -33,10 +33,11 @@ namespace Ordering.Application.Features.Orders.Commands.DeleteOrder
                 throw new NotFoundEXception(nameof(Order), request.Id);
             }
 
-            await _orderRepository.DeleteAsync(orderToDelete);
-            _logger.LogInformation($"Order {orderToDelete.Id} is successfully deleted. ");
+            await _orderRepository.DeleteAsync(orderToDelete); 
+            _logger.LogInformation($"Order {orderToDelete.Id} is successfully deleted.");
 
             return Unit.Value;
         }
+
     }
 }

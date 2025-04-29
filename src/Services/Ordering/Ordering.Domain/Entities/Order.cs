@@ -1,9 +1,4 @@
 ﻿using Ordering.Domain.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ordering.Domain.Entities
 {
@@ -13,8 +8,7 @@ namespace Ordering.Domain.Entities
 
         public decimal TotalPrice { get; set; }
 
-        //BillingAddress
-
+        // BillingAddress
         public string FirstName { get; set; }
 
         public string LastName { get; set; }
@@ -27,10 +21,9 @@ namespace Ordering.Domain.Entities
 
         public string State { get; set; }
 
-        public string  ZipCode { get; set; }
+        public string ZipCode { get; set; }
 
-        //Payment
-
+        // Payment
         public string CardName { get; set; }
 
         public string CardNumber { get; set; }
@@ -40,5 +33,15 @@ namespace Ordering.Domain.Entities
         public string CVV { get; set; }
 
         public int PaymentMethod { get; set; }
+
+        // Constructor to ensure LastModifiedBy and LastModifiedDate are set
+        public Order()
+        {
+            // Set default values to prevent null errors
+            CreatedBy = "Seeder"; // or some default value
+            CreatedDate = DateTime.UtcNow;
+            LastModifiedBy = "Seeder"; // or some default value
+            LastModifiedDate = DateTime.UtcNow;
+        }
     }
 }

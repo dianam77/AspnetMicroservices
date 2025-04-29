@@ -1,4 +1,4 @@
-﻿
+
 services:
   catalogdb:
     container_name: catalogdb
@@ -43,6 +43,8 @@ services:
       interval: 10s
       retries: 5
       start_period: 10s
+  orderdb:
+    image: mcr.microsoft.com/mssql/server:2017-latest
 
   pgadmin:
     container_name: pgadmin
@@ -134,8 +136,25 @@ services:
     ports:
       - "8083:80"
 
+  ordering.api:
+    container_name: ordering.api
+    image: ${DOCKER_REGISTRY-}orderingapi
+    build:
+      context: .
+      dockerfile: Services/Ordering/Ordering.API/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - "ConnectionStrings:OrderingConnectionString=Server=orderdb;Database=OrderDb;User Id=SA;Password=SwN12345678;TrustServerCertificate=True;Encrypt=False"
+    depends_on:
+      orderdb:
+        condition: service_healthy
+    ports:
+     - "8090:80"
+
 volumes:
   mongo_data:
   postgres_data:
   pgadmin_data:
   portainer_data:
+

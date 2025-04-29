@@ -11,9 +11,11 @@ namespace Ordering.Application.Features.Orders.Queries.GetOrdersList
     {
         public string userName { get; set; }
 
+     
         public GetOrderListQuery(string userName)
         {
-            userName = userName ?? throw new ArgumentNullException(nameof(userName));
+            this.userName = userName ?? throw new ArgumentNullException(nameof(userName));
         }
+
     }
 }
