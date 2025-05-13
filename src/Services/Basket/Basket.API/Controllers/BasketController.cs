@@ -3,8 +3,9 @@ using Basket.API.GrpcServices;
 using Basket.API.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using Grpc.Core;
-using Microsoft.Extensions.Logging;
+using AutoMapper;
+using EventBus.Messages.Events;
+using MassTransit;
 
 namespace Basket.API.Controllers
 {
@@ -15,12 +16,21 @@ namespace Basket.API.Controllers
         private readonly IBasketRepository _repository;
         private readonly DiscountGrpcService _discountGrpcService;
         private readonly ILogger<BasketController> _logger;
+        private readonly ISendEndpointProvider _sendEndpointProvider;
+        private readonly IMapper _mapper;
 
-        public BasketController(IBasketRepository repository, DiscountGrpcService discountGrpcService, ILogger<BasketController> logger)
+        public BasketController(
+            IBasketRepository repository,
+            DiscountGrpcService discountGrpcService,
+            ILogger<BasketController> logger,
+            ISendEndpointProvider sendEndpointProvider,
+            IMapper mapper)
         {
-            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-            _discountGrpcService = discountGrpcService ?? throw new ArgumentNullException(nameof(discountGrpcService));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _repository = repository;
+            _discountGrpcService = discountGrpcService;
+            _logger = logger;
+            _sendEndpointProvider = sendEndpointProvider;
+            _mapper = mapper;
         }
 
         [HttpGet("{userName}", Name = "GetBasket")]
@@ -38,8 +48,8 @@ namespace Basket.API.Controllers
         {
             foreach (var item in basket.Items)
             {
-                var copoun = await _discountGrpcService.GetDiscount(item.ProductName);
-                item.Price -= copoun.Amount;
+                var coupon = await _discountGrpcService.GetDiscount(item.ProductName);
+                item.Price -= coupon.Amount;
             }
             return Ok(await _repository.UpdateBasket(basket));
         }
@@ -50,6 +60,34 @@ namespace Basket.API.Controllers
         {
             await _repository.DeleteBasket(userName);
             return Ok();
+        }
+
+        [Route("[action]")]
+        [HttpPost]
+        [ProducesResponseType((int)HttpStatusCode.Accepted)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Checkout([FromBody] BasketCheckout basketCheckout)
+        {
+            if (basketCheckout == null || string.IsNullOrEmpty(basketCheckout.UserName))
+            {
+                return BadRequest("Invalid request.");
+            }
+
+            var basket = await _repository.GetBasket(basketCheckout.UserName);
+            if (basket == null)
+            {
+                return BadRequest("Basket not found.");
+            }
+
+            var eventMessage = _mapper.Map<BasketCheckoutEvent>(basketCheckout);
+            eventMessage.TotalPrice = basket.TotalPrice;
+
+            var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri("queue:BasketCheckout"));
+            await endpoint.Send(eventMessage); // ✅ استفاده از Send به جای Publish
+
+            await _repository.DeleteBasket(basket.UserName);
+
+            return Accepted();
         }
     }
 }

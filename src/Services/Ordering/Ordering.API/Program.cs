@@ -1,4 +1,8 @@
-﻿using Ordering.API.Extentions;
+﻿using EventBus.Messages.Common;
+using MassTransit;
+using MassTransit.Definition;
+using Ordering.API.Extentions;
+using Ordering.API.Mapping;
 using Ordering.Application;
 using Ordering.Infrastructure;
 
@@ -11,7 +15,25 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureService(builder.Configuration);
+builder.Services.AddScoped<BasketCheckoutConsumer>();
 
+builder.Services.AddMassTransit(config =>
+{
+    config.AddConsumer<BasketCheckoutConsumer>();
+
+    config.UsingRabbitMq((ctx, cfg) =>
+    {
+        cfg.Host(builder.Configuration["EventBusSettings:HostAddress"]);
+        cfg.ReceiveEndpoint(EventBusConstants.BasketCheckoutQueue, e =>
+        {
+            e.ConfigureConsumer<BasketCheckoutConsumer>(ctx);
+        });
+    });
+});
+
+builder.Services.AddMassTransitHostedService(); 
+
+builder.Services.AddAutoMapper(typeof(OrderingProfile));
 var app = builder.Build();
 
 try
@@ -30,7 +52,6 @@ catch (Exception ex)
 }
 
 
-// Configure HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

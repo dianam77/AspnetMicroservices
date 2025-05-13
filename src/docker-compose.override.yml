@@ -29,10 +29,12 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - CacheSettings__ConnectionString=basketdb:6379
-      - GrpcSettings__DiscountUrl=http://discount.grpc:80
+      - GrpcSettings__DiscountUrl=http://discount.grpc:5004
+      - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672"
     depends_on:
       - basketdb
       - discount.grpc
+      - rabbitmq
     ports:
       - "8084:80"
 
@@ -73,7 +75,7 @@ services:
       discountdb:
         condition: service_healthy
     ports:
-      - "8083:80"
+      - "5044:5004"
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:80/health"]
       interval: 30s
@@ -106,7 +108,17 @@ services:
       interval: 10s
       retries: 5
       start_period: 10s
-
+  rabbitmq:
+      image: rabbitmq:3-management-alpine
+      ports:
+        - "5672:5672"
+        - "15672:15672"
+      healthcheck:
+        test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+        start_period: 10s
  
   catalogdb:
     image: mongo

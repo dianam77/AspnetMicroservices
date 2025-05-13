@@ -45,6 +45,8 @@ services:
       start_period: 10s
   orderdb:
     image: mcr.microsoft.com/mssql/server:2017-latest
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
 
   pgadmin:
     container_name: pgadmin
@@ -97,8 +99,11 @@ services:
       ASPNETCORE_URLS: http://+:80
       DEBUG: "true"  # Adding a DEBUG variable for development
       GrpcSettings__DiscountUrl: "http://localhost:5004"  # Adding DiscountUrl for gRPC settings
+      EventBusSettings__HostAddress: "amqp://guest:guest@rabbitmq:5672"
     depends_on:
       basketdb:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     ports:
       - "8084:80"  # Ensure port 8081 is correctly mapped to container port 80 for Basket API
@@ -134,7 +139,7 @@ services:
       discountdb:
         condition: service_healthy
     ports:
-      - "8083:80"
+      - "5044:5004"
 
   ordering.api:
     container_name: ordering.api
