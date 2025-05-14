@@ -151,6 +151,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
       - "ConnectionStrings:OrderingConnectionString=Server=orderdb;Database=OrderDb;User Id=SA;Password=SwN12345678;TrustServerCertificate=True;Encrypt=False"
+      - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672" 
     depends_on:
       orderdb:
         condition: service_healthy
