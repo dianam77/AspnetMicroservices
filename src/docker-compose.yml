@@ -158,9 +158,16 @@ services:
     ports:
      - "8090:80"
 
+  ocelotapigw:
+    image: ${DOCKER_REGISTRY-}ocelotapigw
+    build:
+      context: .
+      dockerfile: ApiGetways/OcelotApiGw/Dockerfile
+
 volumes:
   mongo_data:
   postgres_data:
   pgadmin_data:
   portainer_data:
+
 

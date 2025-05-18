@@ -31,9 +31,13 @@ builder.Services.AddMassTransit(config =>
     });
 });
 
-builder.Services.AddMassTransitHostedService(); 
+builder.Services.AddMassTransitHostedService();
 
 builder.Services.AddAutoMapper(typeof(OrderingProfile));
+
+// **Add health check services**
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 try
@@ -51,7 +55,6 @@ catch (Exception ex)
     throw;
 }
 
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -60,4 +63,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthorization();
 app.MapControllers();
+
+// **Map health check endpoint**
+app.MapHealthChecks("/health");
+
 app.Run();

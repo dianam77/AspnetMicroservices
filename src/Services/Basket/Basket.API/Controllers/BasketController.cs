@@ -83,7 +83,8 @@ namespace Basket.API.Controllers
             eventMessage.TotalPrice = basket.TotalPrice;
 
             var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri("queue:BasketCheckout"));
-            await endpoint.Send(eventMessage); // ✅ استفاده از Send به جای Publish
+            await endpoint.Send(eventMessage);
+
 
             await _repository.DeleteBasket(basket.UserName);
 

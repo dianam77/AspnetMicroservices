@@ -170,8 +170,22 @@ services:
 
 
 
+  ocelotapigw:
+    container_name: ocelotapigw
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+    depends_on:
+      - catalog.api
+      - basket.api
+      - discount.api
+      - ordering.api
+    ports:
+      - "8010:8080"
+
 volumes:
   mongo_data:
   postgres_data:
   pgadmin_data:
   portainer_data:
+
