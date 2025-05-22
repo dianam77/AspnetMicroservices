@@ -45,6 +45,7 @@ services:
       start_period: 10s
   orderdb:
     image: mcr.microsoft.com/mssql/server:2017-latest
+
   rabbitmq:
     image: rabbitmq:3-management-alpine
 
@@ -164,10 +165,22 @@ services:
       context: .
       dockerfile: ApiGetways/OcelotApiGw/Dockerfile
 
+
+
+  shopping.aggregator:
+    image: ${DOCKER_REGISTRY-}shoppingaggregator
+    build:
+      context: .
+      dockerfile: ApiGetways/Shopping.Aggregator/Dockerfile
+
 volumes:
   mongo_data:
   postgres_data:
   pgadmin_data:
   portainer_data:
+
+
+
+
 
 

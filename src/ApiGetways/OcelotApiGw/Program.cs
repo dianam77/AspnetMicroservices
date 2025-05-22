@@ -16,7 +16,7 @@ builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
 // روی پورت 8010 گوش کن
-builder.WebHost.UseUrls("http://*:8010");   // یا ConfigureKestrel، هر کدام راحت‌ترید
+builder.WebHost.UseUrls();  
 
 // DI
 builder.Services.AddOcelot()

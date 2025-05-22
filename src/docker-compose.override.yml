@@ -172,9 +172,12 @@ services:
 
   ocelotapigw:
     container_name: ocelotapigw
+    build:
+      context: .
+      dockerfile: ApiGetways/OcelotApiGw/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_URLS=http://+:8080
     depends_on:
       - catalog.api
       - basket.api
@@ -182,10 +185,41 @@ services:
       - ordering.api
     ports:
       - "8010:8080"
+    restart: always
+
+
+
+
+  shopping.aggregator:
+   container_name: shopping.aggregator
+   build:
+     context: .
+     dockerfile: Services/Aggregator/Shopping.Aggregator/Dockerfile
+   restart: always
+   environment:
+     - ASPNETCORE_ENVIRONMENT=Development
+     - ASPNETCORE_URLS=http://+:80
+     - ApiSettings__CatalogUrl=http://catalog.api:80
+     - ApiSettings__BasketUrl=http://basket.api:80
+     - ApiSettings__OrderingUrl=http://ordering.api:80
+   depends_on:
+     - catalog.api
+     - basket.api
+     - ordering.api
+   ports:
+     - "8087:80"
+
+
+
+
+
 
 volumes:
   mongo_data:
   postgres_data:
   pgadmin_data:
   portainer_data:
+
+
+
 
