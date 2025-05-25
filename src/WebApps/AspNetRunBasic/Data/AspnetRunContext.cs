@@ -20,7 +20,6 @@ namespace AspnetRunBasics.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // 💡 ساده‌ترین حالت: فقط فیلدهای حساس را صریح بنویسیم
             modelBuilder.Entity<Product>()
                         .Property(p => p.Price)
                         .HasPrecision(18, 2);
@@ -33,17 +32,7 @@ namespace AspnetRunBasics.Data
                         .Property(o => o.TotalPrice)
                         .HasPrecision(18, 2);
 
-            /*
-            // 🔄 روش عمومی (اختیاری): همهٔ decimal‌ها 18,2 بشوند
-            foreach (var property in modelBuilder.Model.GetEntityTypes()
-                                   .SelectMany(t => t.GetProperties())
-                                   .Where(p => p.ClrType == typeof(decimal)
-                                            || p.ClrType == typeof(decimal?)))
-            {
-                property.SetPrecision(18);
-                property.SetScale(2);
-            }
-            */
+        
         }
     }
 }
