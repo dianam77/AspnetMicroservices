@@ -1,26 +1,30 @@
 ﻿using System.Text.Json;
 
-public static class HttpClientExtensions
+namespace Shopping.Aggregator.Extensions
 {
-    public static async Task<T> ReadContentAs<T>(this HttpResponseMessage response)
+    public static class HttpClientExtensions
     {
-        if (!response.IsSuccessStatusCode)
+        public static async Task<T> ReadContentAs<T>(this HttpResponseMessage response)
         {
-            throw new ApplicationException($"Something went wrong calling the API: {response.ReasonPhrase}");
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new ApplicationException($"Something went wrong calling the API: {response.ReasonPhrase}");
+            }
+
+            var dataAsString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+            var result = JsonSerializer.Deserialize<T>(dataAsString, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (result == null)
+            {
+                throw new ApplicationException("Deserialization returned null.");
+            }
+
+            return result;
         }
-
-        var dataAsString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-        var result = JsonSerializer.Deserialize<T>(dataAsString, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
-
-        if (result == null)
-        {
-            throw new ApplicationException("Deserialization returned null.");
-        }
-
-        return result;
     }
+
 }

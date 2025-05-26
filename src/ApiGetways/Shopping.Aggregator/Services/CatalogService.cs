@@ -1,4 +1,5 @@
-﻿ using Shopping.Aggregator.Models;
+﻿using Shopping.Aggregator.Extensions;
+using Shopping.Aggregator.Models;
 
 namespace Shopping.Aggregator.Services
 {

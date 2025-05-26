@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using AspnetRunBasics.Entities;
-using AspnetRunBasics.Repositories;
+using AspNetRunBasic.Models;
+using AspNetRunBasic.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -9,26 +9,52 @@ namespace AspnetRunBasics
 {
     public class CartModel : PageModel
     {
-        private readonly ICartRepository _cartRepository;
+        private readonly IBasketService _basketService;
 
-        public CartModel(ICartRepository cartRepository)
+        public CartModel(IBasketService basketService)
         {
-            _cartRepository = cartRepository ?? throw new ArgumentNullException(nameof(cartRepository));
+            _basketService = basketService;
         }
 
-        public Entities.Cart Cart { get; set; } = new Entities.Cart();        
+        public BasketModel Cart { get; set; } = new BasketModel();
 
         public async Task<IActionResult> OnGetAsync()
         {
-            Cart = await _cartRepository.GetCartByUserName("test");            
+            var userName = "swg";
+            Cart = await _basketService.GetBasket(userName);
+
+            // Debug: ببینید چندتا آیتم دارید و تعدادشون چنده
+            foreach (var item in Cart.Items)
+            {
+                Console.WriteLine($"Product: {item.ProductName}, Quantity: {item.Quantity}");
+            }
 
             return Page();
         }
 
-        public async Task<IActionResult> OnPostRemoveToCartAsync(int cartId, int cartItemId)
+        public async Task<IActionResult> OnPostRemoveToCartAsync(string productId)
         {
-            await _cartRepository.RemoveItem(cartId, cartItemId);
+            if (string.IsNullOrEmpty(productId))
+            {
+                return RedirectToPage();
+            }
+
+            var userName = "swg";
+            var basket = await _basketService.GetBasket(userName);
+
+            if (basket?.Items != null)
+            {
+                var item = basket.Items.FirstOrDefault(i => i.ProductId == productId);
+                if (item != null)
+                {
+                    basket.Items.Remove(item);
+                    await _basketService.UpdateBasket(basket);
+                }
+            }
+
             return RedirectToPage();
         }
+
+
     }
 }

@@ -8,18 +8,20 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       DatabaseSettings__ConnectionString: "mongodb://catalogdb:27017"
+      DatabaseSettings__DatabaseName: "ProductDb"
       ASPNETCORE_URLS: "http://+:80"
       DEBUG: "true"
     depends_on:
       catalogdb:
         condition: service_healthy
     ports:
-      - "8080:80"
+       - "8080:80"
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:80/health"]
       interval: 30s
       retries: 3
-      start_period: 10s
+      start_period: 30s
+
 
   basket.api:
     container_name: basket.api
@@ -121,16 +123,18 @@ services:
         start_period: 10s
  
   catalogdb:
-    image: mongo
     container_name: catalogdb
+    image: mongo
     restart: always
     ports:
       - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.runCommand({ connectionStatus: 1 })"]
+      test: ["CMD-SHELL", "mongosh --eval 'db.runCommand({ ping: 1 })' || exit 1"]
       interval: 10s
-      timeout: 5s
       retries: 5
+      start_period: 30s
 
   discountdb:
     container_name: discountdb

@@ -38,18 +38,24 @@
                         {
                             <tr>
                                 <td><img src="https://dummyimage.com/50x50/55595c/fff" /></td>
-                                <td>@cartItem.Product.Name</td>
+                                <td>@cartItem.ProductName</td>
                                 <td>In stock</td>
-                                <td><input class="form-control" type="text" value="@cartItem.Quantity" /></td>
-                                <td class="text-right">@(cartItem.Price * cartItem.Quantity) $</td>
-                                <td class="text-right">
-
-                                    <form asp-page-handler="removetocart" method="post">
-                                        <button class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></button>
-                                        <input type="hidden" asp-for="@Model.Cart.Id" name="cartId" />
-                                        <input type="hidden" asp-for="@cartItem.Id" name="cartItemId" />
+                                <td>
+                                    <form method="post" asp-page-handler="UpdateQuantity">
+                                        <input type="hidden" name="productId" value="@cartItem.ProductId" />
+                                        <input class="form-control" type="number" name="quantity" value="@cartItem.Quantity" min="1" />
+                                        <button type="submit" class="btn btn-sm btn-primary mt-1">Update</button>
                                     </form>
 
+
+
+                                </td>
+                                <td class="text-right">@(cartItem.Price* cartItem.Quantity) $</td>
+                                <td class="text-right">
+                                    <form asp-page-handler="RemoveToCart" method="post">
+                                        <input type="hidden" name="productId" value="@cartItem.ProductId" />
+                                        <button type="submit" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></button>
+                                    </form>
                                 </td>
                             </tr>
                         }

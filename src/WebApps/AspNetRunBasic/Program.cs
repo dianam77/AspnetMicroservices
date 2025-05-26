@@ -1,48 +1,29 @@
-﻿using AspnetRunBasics.Data;
-using AspnetRunBasics.Repositories;
-using Microsoft.EntityFrameworkCore;
+﻿using AspNetRunBasic.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Load configuration
 var configuration = builder.Configuration;
 
-// Add services to the container.
-builder.Services.AddDbContext<AspnetRunContext>(options =>
-    options.UseSqlServer(
-        configuration.GetConnectionString("AspnetRunConnection"),
-        sqlOptions => sqlOptions.EnableRetryOnFailure()
-    ));
-
-
-// Register repositories
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<ICartRepository, CartRepository>();
-builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-builder.Services.AddScoped<IContactRepository, ContactRepository>();
-
-// Add Razor Pages
 builder.Services.AddRazorPages();
 
-var app = builder.Build();
-
-// Seed database
-using (var scope = app.Services.CreateScope())
+// Add HttpClients BEFORE builder.Build()
+builder.Services.AddHttpClient<ICatalogService, CatalogService>(client =>
 {
-    var services = scope.ServiceProvider;
-    var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+    client.BaseAddress = new Uri(configuration["ApiSettings:CatalogUrl"]!);
+});
 
-    try
-    {
-        var context = services.GetRequiredService<AspnetRunContext>();
-        AspnetRunContextSeed.SeedAsync(context, loggerFactory).Wait();
-    }
-    catch (Exception ex)
-    {
-        var logger = loggerFactory.CreateLogger("App");
-        logger.LogError(ex, "An error occurred seeding the DB.");
-    }
-}
+builder.Services.AddHttpClient<IBasketService, BasketService>(client =>
+{
+    client.BaseAddress = new Uri(configuration["ApiSettings:BasketUrl"]!);
+});
+
+builder.Services.AddHttpClient<IOrderService, OrderService>(client =>
+{
+    client.BaseAddress = new Uri(configuration["ApiSettings:OrderingUrl"]!);
+});
+
+var app = builder.Build();
 
 // Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())
