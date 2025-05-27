@@ -43,9 +43,11 @@
                                 <td>
                                     <form method="post" asp-page-handler="UpdateQuantity">
                                         <input type="hidden" name="productId" value="@cartItem.ProductId" />
-                                        <input class="form-control" type="number" name="quantity" value="@cartItem.Quantity" min="1" />
+                                        <input class="form-control" type="number" name="quantity"
+                                               value="@cartItem.Quantity" min="1" />
                                         <button type="submit" class="btn btn-sm btn-primary mt-1">Update</button>
                                     </form>
+
 
 
 

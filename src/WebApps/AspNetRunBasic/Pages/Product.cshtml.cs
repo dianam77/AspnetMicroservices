@@ -14,7 +14,8 @@ namespace AspnetRunBasics
         private readonly ICatalogService _catalogService;
         private readonly IBasketService _basketService;
 
-        public ProductModel(ICatalogService catalogService, IBasketService basketService)
+        public ProductModel(ICatalogService catalogService,
+                            IBasketService basketService)
         {
             _catalogService = catalogService;
             _basketService = basketService;
@@ -23,59 +24,58 @@ namespace AspnetRunBasics
         public IEnumerable<string> CategoryList { get; set; } = new List<string>();
         public IEnumerable<CatalogModel> ProductList { get; set; } = new List<CatalogModel>();
 
-
         [BindProperty(SupportsGet = true)]
-        public string SelectedCategory { get; set; }
+        public string SelectedCategory { get; set; } = string.Empty;
 
-        public async Task<IActionResult> OnGetAsync(string categoryName)
+        /* ---------- GET ---------- */
+        public async Task<IActionResult> OnGetAsync()
         {
-            var productList = await _catalogService.GetCatalog();
-
-            CategoryList = productList.Select(p => p.Category).Distinct();
-
-            if (!string.IsNullOrWhiteSpace(categoryName))
-            {
-                ProductList = productList.Where(p => p.Category == categoryName);
-                SelectedCategory = categoryName;
-            }
-            else
-            {
-                ProductList = productList;
-            }
+            var products = await _catalogService.GetCatalog();
+            CategoryList = products.Select(p => p.Category).Distinct();
+            ProductList = string.IsNullOrWhiteSpace(SelectedCategory)
+                            ? products
+                            : products.Where(p => p.Category == SelectedCategory);
 
             return Page();
         }
 
-
+        /* ---------- POST: Add / Update ---------- */
         public async Task<IActionResult> OnPostUpdateQuantityAsync(string productId, int quantity)
         {
-            var userName = "swg";
+            if (string.IsNullOrWhiteSpace(productId) || quantity < 0)
+                return RedirectToPage("Product", new { SelectedCategory });
+
+            const string userName = "swg";
             var basket = await _basketService.GetBasket(userName);
 
-            var item = basket.Items.FirstOrDefault(i => i.ProductId == productId);
-            if (item != null)
+            var item = basket.Items?.FirstOrDefault(i => i.ProductId == productId);
+
+            if (item == null && quantity > 0)
             {
-                if (quantity > 0)
+                var product = await _catalogService.GetCatalog(productId);
+                if (product == null)                      // دفاع در برابر Null
+                    return RedirectToPage("Product", new { SelectedCategory });
+
+                basket.Items.Add(new BasketItemModel
                 {
-                    item.Quantity = quantity;
-                }
-                else
-                {
-                    // حذف محصول اگر تعداد صفر یا کمتر شد
+                    ProductId = product.Id,
+                    ProductName = product.Name,
+                    Price = product.Price,
+                    Quantity = quantity,
+                    Color = "Black"
+                });
+            }
+            else if (item != null)
+            {
+                if (quantity == 0)
                     basket.Items.Remove(item);
-                }
-
-                await _basketService.UpdateBasket(basket);
-            }
-            else
-            {
-                // محصول پیدا نشد، می‌توانید لاگ کنید یا کاری انجام دهید
+                else
+                    item.Quantity = quantity;
             }
 
-            return RedirectToPage();
+            await _basketService.UpdateBasket(basket);
+            return RedirectToPage("Product", new { SelectedCategory });
         }
-
-
-
     }
+
 }

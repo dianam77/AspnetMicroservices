@@ -1,41 +1,41 @@
-﻿using AspNetRunBasic.Extensions;
-using AspNetRunBasic.Models;
+﻿using AspNetRunBasic.Models;
+using AspNetRunBasic.Services;
+using System.Net.Http.Json; 
 
-namespace AspNetRunBasic.Services
+public class BasketService : IBasketService
 {
-    public class BasketService : IBasketService
+    private readonly HttpClient _client;
+    private const string BasePath = "basket";          
+
+    public BasketService(HttpClient client)
     {
-        private readonly HttpClient _Client;
+        _client = client;
+    }
 
-        public BasketService(HttpClient client)
-        {
-            _Client = client;
-        }
+    /* ---------- Checkout ---------- */
+    public async Task CheckoutBasket(BasketCheckoutModel model)
+    {
+        var response = await _client.PostAsJsonAsync($"{BasePath}/checkout", model);
 
-        public async Task CheckoutBasket(BasketCheckoutModel model)
+        if (!response.IsSuccessStatusCode)
         {
-            var response = await _Client.PostAsJson($"/Basket/Checkout", model);
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception("something went wrong when calling api.");
-            }
+            var body = await response.Content.ReadAsStringAsync();
+            throw new ApplicationException(
+                $"Checkout API failed. StatusCode: {(int)response.StatusCode}, Body: {body}");
         }
-        
-        public async Task<BasketModel> GetBasket(string userName)
-        {
-            var response = await _Client.GetAsync($"/Basket/{userName}");
-            return await response.ReadContentAs<BasketModel>();
-        }
+    }
 
-        public async Task<BasketModel> UpdateBasket(BasketModel model)
-        {
-            var response = await _Client.PostAsJson($"/Basket",model);
-            if(response.IsSuccessStatusCode)
-                return await response.ReadContentAs<BasketModel>();
-            else
-            {
-                throw new Exception("something went wrong when calling api.");
-            }
-        }
+    /* ---------- Get Basket ---------- */
+    public async Task<BasketModel> GetBasket(string userName)
+    {
+        return await _client.GetFromJsonAsync<BasketModel>($"{BasePath}/{userName}");
+    }
+
+    /* ---------- Update Basket ---------- */
+    public async Task<BasketModel> UpdateBasket(BasketModel model)
+    {
+        var response = await _client.PostAsJsonAsync($"{BasePath}", model);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<BasketModel>();
     }
 }
