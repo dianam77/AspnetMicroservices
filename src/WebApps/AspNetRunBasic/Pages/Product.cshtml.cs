@@ -27,55 +27,35 @@ namespace AspnetRunBasics
         [BindProperty(SupportsGet = true)]
         public string SelectedCategory { get; set; } = string.Empty;
 
-        /* ---------- GET ---------- */
         public async Task<IActionResult> OnGetAsync()
         {
-            var products = await _catalogService.GetCatalog();
-            CategoryList = products.Select(p => p.Category).Distinct();
-            ProductList = string.IsNullOrWhiteSpace(SelectedCategory)
-                            ? products
-                            : products.Where(p => p.Category == SelectedCategory);
-
+            ProductList = await _catalogService.GetCatalog();
             return Page();
         }
 
-        /* ---------- POST: Add / Update ---------- */
-        public async Task<IActionResult> OnPostUpdateQuantityAsync(string productId, int quantity)
+        public async Task<IActionResult> OnPostAddToCartAsync(string productId)
         {
-            if (string.IsNullOrWhiteSpace(productId) || quantity < 0)
-                return RedirectToPage("Product", new { SelectedCategory });
+            //if (!User.Identity.IsAuthenticated)
+            //    return RedirectToPage("./Account/Login", new { area = "Identity" });
 
-            const string userName = "swg";
+            var product = await _catalogService.GetCatalog(productId);
+
+            var userName = "swg";
             var basket = await _basketService.GetBasket(userName);
 
-            var item = basket.Items?.FirstOrDefault(i => i.ProductId == productId);
-
-            if (item == null && quantity > 0)
+            basket.Items.Add(new BasketItemModel
             {
-                var product = await _catalogService.GetCatalog(productId);
-                if (product == null)                      // دفاع در برابر Null
-                    return RedirectToPage("Product", new { SelectedCategory });
+                ProductId = productId,
+                ProductName = product.Name,
+                Price = product.Price,
+                Quantity = 1,
+                Color = "Black"
+            });
 
-                basket.Items.Add(new BasketItemModel
-                {
-                    ProductId = product.Id,
-                    ProductName = product.Name,
-                    Price = product.Price,
-                    Quantity = quantity,
-                    Color = "Black"
-                });
-            }
-            else if (item != null)
-            {
-                if (quantity == 0)
-                    basket.Items.Remove(item);
-                else
-                    item.Quantity = quantity;
-            }
-
-            await _basketService.UpdateBasket(basket);
-            return RedirectToPage("Product", new { SelectedCategory });
+            var basketUpdated = await _basketService.UpdateBasket(basket);
+            return RedirectToPage("Cart");
         }
+
     }
 
 }

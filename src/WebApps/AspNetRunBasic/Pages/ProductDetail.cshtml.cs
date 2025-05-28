@@ -55,7 +55,7 @@ namespace AspnetRunBasics
                 return NotFound();
             }
 
-            var userName = "swg"; // در پروژه واقعی باید نام کاربر واقعی را دریافت کنید
+            var userName = "swg";
 
             var basket = await _basketService.GetBasket(userName);
 
@@ -64,8 +64,8 @@ namespace AspnetRunBasics
                 ProductId = productId,
                 ProductName = product.Name,
                 Price = product.Price,
-                Quantity = Quantity,  // استفاده از مقدار bind شده از فرم
-                Color = Color         // استفاده از مقدار bind شده از فرم
+                Quantity = Quantity,  
+                Color = Color         
             });
 
             var basketUpdated = await _basketService.UpdateBasket(basket);

@@ -116,20 +116,23 @@
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).ready(function () {
-            var quantityInput = $('#quantity');
+        $(function () {
+            const quantityInput = $('#quantity');
 
-            $('.quantity-left-minus').click(function (e) {
+            $('.quantity-left-minus').off('click');
+            $('.quantity-right-plus').off('click');
+
+            $('.quantity-left-minus').on('click', function (e) {
                 e.preventDefault();
-                var currentVal = parseInt(quantityInput.val());
+                let currentVal = parseInt(quantityInput.val());
                 if (!isNaN(currentVal) && currentVal > 1) {
                     quantityInput.val(currentVal - 1);
                 }
             });
 
-            $('.quantity-right-plus').click(function (e) {
+            $('.quantity-right-plus').on('click', function (e) {
                 e.preventDefault();
-                var currentVal = parseInt(quantityInput.val());
+                let currentVal = parseInt(quantityInput.val());
                 if (!isNaN(currentVal)) {
                     quantityInput.val(currentVal + 1);
                 }

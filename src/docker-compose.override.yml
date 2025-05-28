@@ -1,4 +1,6 @@
+﻿
 services:
+
   catalog.api:
     container_name: catalog.api
     build:
@@ -15,13 +17,24 @@ services:
       catalogdb:
         condition: service_healthy
     ports:
-       - "8080:80"
+      - "8080:80"
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:80/health"]
       interval: 30s
       retries: 3
       start_period: 30s
-
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@aspnetrun.com
+      PGADMIN_DEFAULT_PASSWORD: admin1234
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/root/.pgadmin
+  
 
   basket.api:
     container_name: basket.api
@@ -83,7 +96,7 @@ services:
       interval: 30s
       retries: 3
       start_period: 10s
-  
+
   orderdb:
     container_name: orderdb
     image: mcr.microsoft.com/mssql/server:2017-latest
@@ -110,18 +123,20 @@ services:
       interval: 10s
       retries: 5
       start_period: 10s
+
   rabbitmq:
-      image: rabbitmq:3-management-alpine
-      ports:
-        - "5672:5672"
-        - "15672:15672"
-      healthcheck:
-        test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
-        interval: 10s
-        timeout: 5s
-        retries: 5
-        start_period: 10s
- 
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+  
+
   catalogdb:
     container_name: catalogdb
     image: mongo
@@ -164,15 +179,12 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
       - "ConnectionStrings:OrderingConnectionString=Server=orderdb;Database=OrderDb;User Id=SA;Password=SwN12345678;TrustServerCertificate=True;Encrypt=False"
-      - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672" 
+      - "EventBusSettings:HostAddress=amqp://guest:guest@rabbitmq:5672"
     depends_on:
       orderdb:
         condition: service_healthy
     ports:
-     - "8090:80"
-
-
-
+      - "8090:80"
 
   ocelotapigw:
     container_name: ocelotapigw
@@ -191,29 +203,51 @@ services:
       - "8010:8080"
     restart: always
 
-
-
-
   shopping.aggregator:
-   container_name: shopping.aggregator
-   build:
-     context: .
-     dockerfile: Services/Aggregator/Shopping.Aggregator/Dockerfile
-   restart: always
-   environment:
-     - ASPNETCORE_ENVIRONMENT=Development
-     - ASPNETCORE_URLS=http://+:80
-     - ApiSettings__CatalogUrl=http://catalog.api:80
-     - ApiSettings__BasketUrl=http://basket.api:80
-     - ApiSettings__OrderingUrl=http://ordering.api:80
-   depends_on:
-     - catalog.api
-     - basket.api
-     - ordering.api
-   ports:
-     - "8087:80"
+    container_name: shopping.aggregator
+    build:
+      context: .
+      dockerfile: Services/Aggregator/Shopping.Aggregator/Dockerfile
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ApiSettings__CatalogUrl=http://catalog.api:80
+      - ApiSettings__BasketUrl=http://basket.api:80
+      - ApiSettings__OrderingUrl=http://ordering.api:80
+    depends_on:
+      - ocelotapigw
+      - catalog.api
+      - basket.api
+      - discount.api
+      - ordering.api
+    ports:
+      - "8087:80"
+
+  
 
 
+  aspnetrunbasic:
+      build:
+        context: .
+        dockerfile: WebApps/AspNetRunBasic/Dockerfile
+      container_name: aspnetrunbasic
+      environment:
+        - ASPNETCORE_ENVIRONMENT=Docker
+        - ApiSettings__CatalogUrl=http://ocelotapigw:8080    
+        - ApiSettings__BasketUrl=http://ocelotapigw:8080
+        - ApiSettings__OrderingUrl=http://ocelotapigw:8080
+        - ApiSettings__GateWayAddress=http://ocelotapigw:8080
+      ports:
+        - "8089:8080"
+      volumes:
+        - dataprotection_keys:/app/dataprotectionkeys
+      depends_on:
+        - ocelotapigw
+        - catalog.api
+        - basket.api
+        - discount.api
+        - ordering.api
 
 
 
@@ -223,7 +257,4 @@ volumes:
   postgres_data:
   pgadmin_data:
   portainer_data:
-
-
-
-
+  dataprotection_keys:

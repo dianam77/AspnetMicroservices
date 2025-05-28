@@ -41,7 +41,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OcelotApiGw", "ApiGetways\O
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shopping.Aggregator", "ApiGetways\Shopping.Aggregator\Shopping.Aggregator.csproj", "{7E71DAF0-7CEC-4F6F-BD5E-8238660CE6FA}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebApps", "WebApps", "{5C8A42F6-47BF-42AD-A4DA-08FAE9A0C52D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebApp", "WebApp", "{5C8A42F6-47BF-42AD-A4DA-08FAE9A0C52D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetRunBasic", "WebApps\AspNetRunBasic\AspNetRunBasic.csproj", "{3C19EBF2-AB37-0CDE-9EBD-CB94F0BA43D8}"
 EndProject

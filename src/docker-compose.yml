@@ -68,7 +68,7 @@ services:
     restart: always
     ports:
       - "8000:8000"
-      - "9000:9000"
+      - "9011:9000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
@@ -181,11 +181,26 @@ services:
       context: .
       dockerfile: ApiGetways/Shopping.Aggregator/Dockerfile
 
+
+
+
+
+
+  aspnetrunbasic:
+    image: ${DOCKER_REGISTRY-}aspnetrunbasic
+    build:
+      context: .
+      dockerfile: WebApps/AspNetRunBasic/Dockerfile
+
 volumes:
   mongo_data:
   postgres_data:
   pgadmin_data:
   portainer_data:
+
+
+
+
 
 
 

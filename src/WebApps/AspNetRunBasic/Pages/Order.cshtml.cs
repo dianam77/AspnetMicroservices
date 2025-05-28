@@ -21,20 +21,23 @@ namespace AspnetRunBasics
 
         public async Task<IActionResult> OnGetAsync()
         {
+            string userName = User.Identity?.Name ?? "swg"; 
+
             try
             {
-                Orders = await _orderService.GetOrderByUserName("swg");
+                Orders = await _orderService.GetOrderByUserName(userName);
             }
             catch (Exception ex)
             {
-                // لاگ کامل خطا
                 Console.WriteLine("Order API error: " + ex);
-                Orders = Enumerable.Empty<OrderResponseModel>();   // صفحه خالی ولی بی‌خطا
+                Orders = Enumerable.Empty<OrderResponseModel>();
                 ModelState.AddModelError(string.Empty,
                     "خطا در بازیابی سفارش‌ها. لطفاً بعداً دوباره تلاش کنید.");
             }
+
             return Page();
         }
+
 
     }
 }
