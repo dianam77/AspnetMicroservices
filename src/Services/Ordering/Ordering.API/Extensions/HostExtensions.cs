@@ -32,7 +32,7 @@ namespace Ordering.API.Extentions
                     if (retryForAvailability < 50)
                     {
                         retryForAvailability++;
-                        await Task.Delay(2000); // Use Task.Delay instead of Thread.Sleep
+                        await Task.Delay(2000);
                         await MigrateDatabaseAsync<TContext>(host, seeder, retryForAvailability);
                     }
                 }
@@ -43,8 +43,8 @@ namespace Ordering.API.Extentions
         private static async Task InvokeSeederAsync<TContext>(Func<TContext, IServiceProvider, Task> seeder,
             TContext context, IServiceProvider services) where TContext : DbContext
         {
-            await context.Database.MigrateAsync(); // Ensure async database migration
-            await seeder(context, services); // Invoke async seeder
+            await context.Database.MigrateAsync();
+            await seeder(context, services); 
         }
     }
 }

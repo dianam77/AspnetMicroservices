@@ -9,7 +9,7 @@ namespace Ordering.Infrastructure.Persistence
     {
         public OrderContext CreateDbContext(string[] args)
         {
-            // Find the absolute path to the startup project (Ordering.API)
+          
             var basePath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "Ordering.API"));
 
             var configuration = new ConfigurationBuilder()

@@ -28,11 +28,9 @@ namespace Discount.API.Extensions
 
                     using var command = new NpgsqlCommand { Connection = connection };
 
-                    // Drop the Coupon table if it exists
                     command.CommandText = "DROP TABLE IF EXISTS Coupon";
                     command.ExecuteNonQuery();
 
-                    // Create the Coupon table with corrected SQL syntax
                     command.CommandText = @"
                             CREATE TABLE IF NOT EXISTS Coupon (
                                 Id SERIAL PRIMARY KEY,
@@ -44,7 +42,6 @@ namespace Discount.API.Extensions
                     command.ExecuteNonQuery();
 
 
-                    // Insert default records
                     command.CommandText = "INSERT INTO Coupon (ProductName, Description, Amount) VALUES ('Iphone X', 'Iphone Discount', 150);";
                     command.ExecuteNonQuery();
 
@@ -60,7 +57,7 @@ namespace Discount.API.Extensions
                     if (retryForAvailability < 5)
                     {
                         retryForAvailability++;
-                        System.Threading.Thread.Sleep(2000); // Consider using Task.Delay in an async context
+                        System.Threading.Thread.Sleep(2000); 
                         return MigrateDatabase<TContext>(host, retryForAvailability);
                     }
                 }

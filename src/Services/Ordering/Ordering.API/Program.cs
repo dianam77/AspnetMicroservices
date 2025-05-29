@@ -9,7 +9,6 @@ using Ordering.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -35,7 +34,7 @@ builder.Services.AddMassTransitHostedService();
 
 builder.Services.AddAutoMapper(typeof(OrderingProfile));
 
-// **Add health check services**
+
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
@@ -64,7 +63,6 @@ if (app.Environment.IsDevelopment())
 app.UseAuthorization();
 app.MapControllers();
 
-// **Map health check endpoint**
 app.MapHealthChecks("/health");
 
 app.Run();

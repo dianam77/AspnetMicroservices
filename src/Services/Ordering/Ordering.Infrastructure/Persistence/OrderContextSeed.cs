@@ -6,7 +6,6 @@ public class OrderContextSeed
 {
     public static async Task SeedAsync(OrderContext orderContext, ILogger<OrderContextSeed> logger)
     {
-        // Check if a record with UserName "swg" already exists
         var userExists = await orderContext.Orders
             .AnyAsync(o => o.UserName == "swg");
 
@@ -16,29 +15,27 @@ public class OrderContextSeed
 
             foreach (var order in orders)
             {
-                // Ensure that LastModifiedBy and CreatedBy are set for all records
                 if (string.IsNullOrEmpty(order.CreatedBy))
                 {
-                    order.CreatedBy = "Seeder"; // Set default if null
+                    order.CreatedBy = "Seeder"; 
                 }
 
                 if (string.IsNullOrEmpty(order.LastModifiedBy))
                 {
-                    order.LastModifiedBy = "Seeder"; // Set default if null
+                    order.LastModifiedBy = "Seeder"; 
                 }
 
                 if (order.CreatedDate == default)
                 {
-                    order.CreatedDate = DateTime.UtcNow; // Set CreatedDate if not set
+                    order.CreatedDate = DateTime.UtcNow; 
                 }
 
                 if (order.LastModifiedDate == default)
                 {
-                    order.LastModifiedDate = DateTime.UtcNow; // Set LastModifiedDate if not set
+                    order.LastModifiedDate = DateTime.UtcNow; 
                 }
             }
 
-            // Add the orders to the context and save them
             orderContext.Orders.AddRange(orders);
             await orderContext.SaveChangesAsync();
 
@@ -70,10 +67,10 @@ public class OrderContextSeed
                 Expiration = "12/26",
                 CVV = "123",
                 PaymentMethod = 1,
-                CreatedBy = "Seeder", // Ensure this is always set
-                CreatedDate = DateTime.UtcNow, // Ensure this is always set
-                LastModifiedBy = "Seeder", // Ensure this is always set
-                LastModifiedDate = DateTime.UtcNow // Ensure this is always set
+                CreatedBy = "Seeder", 
+                CreatedDate = DateTime.UtcNow, 
+                LastModifiedBy = "Seeder", 
+                LastModifiedDate = DateTime.UtcNow 
             }
         };
     }

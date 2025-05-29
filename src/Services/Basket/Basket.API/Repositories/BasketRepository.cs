@@ -18,7 +18,7 @@ namespace Basket.API.Repositories
 
         public async Task<ShoppingCart?> GetBasket(string userName)
         {
-            userName = userName.Trim();  // حذف فضای اضافی
+            userName = userName.Trim(); 
             try
             {
                 var basket = await _redisCache.GetStringAsync(userName).ConfigureAwait(false);

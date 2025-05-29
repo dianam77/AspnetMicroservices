@@ -13,11 +13,11 @@ public class OrderContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Explicitly set precision and scale for TotalPrice property in Order entity
+       
         modelBuilder.Entity<Order>()
             .Property(o => o.TotalPrice)
-            .HasColumnType("decimal(18,2)") // Define precision and scale
-            .IsRequired(); // Optionally, you can make TotalPrice required if necessary
+            .HasColumnType("decimal(18,2)") 
+            .IsRequired(); 
     }
 
 
@@ -29,11 +29,11 @@ public class OrderContext : DbContext
             {
                 case EntityState.Added:
                     entry.Entity.CreatedDate = DateTime.Now;
-                    entry.Entity.CreatedBy = "swg"; // Ideally, set this dynamically (e.g., from the logged-in user)
+                    entry.Entity.CreatedBy = "swg"; 
                     break;
                 case EntityState.Modified:
                     entry.Entity.LastModifiedDate = DateTime.Now;
-                    entry.Entity.LastModifiedBy = "swg"; // Set dynamically as well
+                    entry.Entity.LastModifiedBy = "swg"; 
                     break;
             }
         }

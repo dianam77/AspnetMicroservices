@@ -44,7 +44,6 @@ namespace Catalog.API.Controllers
         }
 
 
-        // Route to get products by category
         [HttpGet]
         [Route("category/{category}", Name = "GetProductByCategory")]
         public async Task<ActionResult<IEnumerable<Product>>> GetProductByCategory([FromRoute] string category)
@@ -71,13 +70,11 @@ namespace Catalog.API.Controllers
             }
         }
 
-        // Route to update an existing product
         [HttpPut]
         [Route("{id:length(24)}", Name = "UpdateProduct")]
         [ProducesResponseType(typeof(Product), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> UpdateProduct(string id, [FromBody] Product product)
         {
-            // Ensure the product ID in the body matches the route
             if (product.Id != id)
             {
                 return BadRequest("Product ID mismatch");
@@ -91,7 +88,6 @@ namespace Catalog.API.Controllers
             return Ok(updatedProduct);
         }
 
-        // Route to delete a product
         [HttpDelete]
         [Route("{id:length(24)}", Name = "DeleteProduct")]
         public async Task<IActionResult> DeleteProduct([FromBody] string id)

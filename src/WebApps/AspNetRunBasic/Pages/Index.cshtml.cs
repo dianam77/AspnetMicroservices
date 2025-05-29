@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using AspNetRunBasic.Models;
+﻿using AspNetRunBasic.Models;
 using AspNetRunBasic.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -29,8 +26,7 @@ namespace AspnetRunBasics.Pages
 
         public async Task<IActionResult> OnPostAddToCartAsync(string productId)
         {
-            //if (!User.Identity.IsAuthenticated)
-            //    return RedirectToPage("./Account/Login", new { area = "Identity" });
+            
 
             var product = await _catalogService.GetCatalog(productId);
 
